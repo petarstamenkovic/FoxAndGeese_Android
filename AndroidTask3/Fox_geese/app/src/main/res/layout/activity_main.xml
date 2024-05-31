@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="text"
-        android:text="Name"
+        android:hint="Name"
         app:layout_constraintBottom_toTopOf="@id/btnEnterRoom"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/tvUsername"
@@ -87,7 +87,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/tvEnterIP"
         android:inputType="text"
-        android:text="IP Address"
+        android:hint="IP Address"
         tools:layout_editor_absoluteX="147dp"
         tools:layout_editor_absoluteY="95dp" />
 
@@ -104,7 +104,7 @@
 
     <Button
         android:id="@+id/btnAccept"
-        app:layout_constraintTop_toBottomOf="@id/tvChallenge"
+        app:layout_constraintTop_toBottomOf="@id/spAllPlayers"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_width="wrap_content"
@@ -115,7 +115,7 @@
 
     <Button
         android:id="@+id/btnDecline"
-        app:layout_constraintTop_toBottomOf="@id/tvChallenge"
+        app:layout_constraintTop_toBottomOf="@id/spAllPlayers"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_width="wrap_content"
@@ -146,4 +146,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         tools:layout_editor_absoluteX="112dp"
         tools:layout_editor_absoluteY="566dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

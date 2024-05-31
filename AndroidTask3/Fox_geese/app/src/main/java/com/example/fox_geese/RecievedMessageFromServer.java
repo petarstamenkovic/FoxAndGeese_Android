@@ -1,5 +1,8 @@
 package com.example.fox_geese;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
+import android.content.Intent;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -24,13 +27,27 @@ public class RecievedMessageFromServer implements Runnable {
             try {
                 line = this.br.readLine();
 
-                // Receive a message, parse the data and in runOnUiThread method modify necessary GUI changes
-                if (line.startsWith("NewList: ")) {
+                /*
+                if(line.startsWith("ConnectOk"))
+                {
+                    parent.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            parent.getBtnConnect().setEnabled(false);
+                            parent.getEtIP().setEnabled(false);
+                            parent.getBtnEnterRoom().setEnabled(true);
+                            parent.getEtUsername().setEnabled(true);
+                        }
+                    });
+                }
+                 */
 
+                // Receive a message, parse the data and in runOnUiThread method modify necessary GUI changes
+                if (line.startsWith("NewList")) {
                     String[] userTokens = line.split(":");
                     String allUsernames = userTokens[1];
                     String[] usernames = allUsernames.split(",");
-
+                    System.out.println("I recieved new list from server:" + line);
                     // Fill the spinner and modify the component availability
                     parent.runOnUiThread(new Runnable() {
                         @Override
@@ -40,8 +57,8 @@ public class RecievedMessageFromServer implements Runnable {
                             ArrayAdapter<String> adapter = new ArrayAdapter<>(parent, android.R.layout.simple_spinner_item, usernames);
                             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                             spinner.setAdapter(adapter);
-                            parent.getBtnConnect().setEnabled(false);
                             parent.getBtnEnterRoom().setEnabled(false);
+                            parent.getEtUsername().setEnabled(false);
                             parent.getSpAllPlayers().setEnabled(true);
                             parent.getBtnChallenge().setEnabled(true);
                         }
@@ -52,13 +69,14 @@ public class RecievedMessageFromServer implements Runnable {
                 if(line.startsWith("Recieved challenge"))
                 {
                     String [] challengeToken = line.split(":");
-                    String challengedUser = challengeToken[1];
-                    String challenger = challengeToken[2];
+                    String challengedUser = challengeToken[2];
+                    String challenger = challengeToken[1];
+                    String challengeMessage = "Challenge from:"+challenger;
                     parent.setChallenger(challenger);
                     parent.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            parent.getTvChallenge().setText(line);
+                            parent.getTvChallenge().setText(challengeMessage);
                             parent.getBtnAccept().setEnabled(true);
                             parent.getBtnDecline().setEnabled(true);
                         }
@@ -73,6 +91,8 @@ public class RecievedMessageFromServer implements Runnable {
                         public void run() {
                             //Toast.makeText(MainActivity.this, "Challenge declined!", Toast.LENGTH_LONG).show();  why is this not working?
                             parent.getTvChallenge().setText("Challenge declined, try again later!");
+                            //parent.getBtnDecline().setEnabled(false);
+                            //parent.getBtnAccept().setEnabled(false);
                         }
                     });
 
@@ -81,8 +101,8 @@ public class RecievedMessageFromServer implements Runnable {
                 // Both clients accepted a game, new activity should be presented to both??
                 if(line.startsWith("Game on"))
                 {
-
-
+                    Intent intent = new Intent(parent,GameActivity.class);
+                    parent.startActivity(intent);
                 }
                 /// NEW BLOCK STARTS HERE ///
                 ///if(line.startsWith(""))///

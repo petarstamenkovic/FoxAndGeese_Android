@@ -1,5 +1,6 @@
 package com.example.fox_geese;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     {
         return this.etUsername;
     }
+    public EditText getEtIP(){return this.etIP;}
     public Button getBtnConnect()
     {
         return this.btnConnect;
@@ -114,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
         spAllPlayers.setEnabled(false);
 
         tvChallenge = (TextView) findViewById(R.id.tvChallenge);
+
         // Button that connects to a server
         btnConnect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -121,6 +124,9 @@ public class MainActivity extends AppCompatActivity {
                 connectToServer();
                 MainActivity.this.btnEnterRoom.setEnabled(true);
                 MainActivity.this.etUsername.setEnabled(true);
+                MainActivity.this.btnConnect.setEnabled(false);
+                MainActivity.this.etIP.setEnabled(false);
+                //new Thread(new RecievedMessageFromServer(MainActivity.this)).start();
             }
         });
 
@@ -147,17 +153,22 @@ public class MainActivity extends AppCompatActivity {
                 String challenger = MainActivity.this.etUsername.getText().toString().trim();
                 sendMessage("Challenge:"+userToChallenge+":"+challenger);
 
-                new Thread(new RecievedMessageFromServer(MainActivity.this)).start();
+                //new Thread(new RecievedMessageFromServer(MainActivity.this)).start();
             }
         });
 
-        // Button that declines a challenge
+        // Button that declines a challenge - Report to challenger that he has been declined
         btnDecline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMessage("Declined challenge:"+ challenger);
+                String declineInfo = tvChallenge.getText().toString();
+                String [] declineToken = declineInfo.split(":");
+                String whoGotDeclined = declineToken[1];
+                sendMessage("Declined challenge:"+ whoGotDeclined);
+                btnAccept.setEnabled(false);
+                btnDecline.setEnabled(false);
 
-                new Thread(new RecievedMessageFromServer(MainActivity.this)).start();
+                //new Thread(new RecievedMessageFromServer(MainActivity.this)).start();
             }
         });
 
@@ -168,10 +179,12 @@ public class MainActivity extends AppCompatActivity {
                 String contestantInfo = tvChallenge.getText().toString();
                 String [] contestantTokens = contestantInfo.split(":");
                 String challenger = contestantTokens[1];
-                String challengedUser = contestantTokens[2];
+                String challengedUser = etUsername.getText().toString();
                 sendMessage("Accepted challenge - Game on:" + challenger + ":" + challengedUser);
 
-                new Thread(new RecievedMessageFromServer(MainActivity.this)).start();
+                //Intent intent = new Intent(MainActivity.this,GameActivity.class);
+                //startActivity(intent);
+                //new Thread(new RecievedMessageFromServer(MainActivity.this)).start();
             }
         });
 
@@ -193,7 +206,6 @@ public class MainActivity extends AppCompatActivity {
                         if(!MainActivity.this.etIP.getText().toString().equals("")) {
                             String ip_address = MainActivity.this.etIP.getText().toString();
                             MainActivity.this.socket = new Socket(ip_address, 6001);
-                            Toast.makeText(MainActivity.this, "Connected to server, welcome!", Toast.LENGTH_SHORT).show();
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

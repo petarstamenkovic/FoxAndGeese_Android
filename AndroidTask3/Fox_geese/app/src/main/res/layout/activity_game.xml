@@ -15,8 +15,32 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         app:layout_constraintDimensionRatio="1:1"
         tools:layout_editor_absoluteX="1dp"
-        tools:layout_editor_absoluteY="1dp"></LinearLayout>
+        tools:layout_editor_absoluteY="1dp" />
+
+    <TextView
+        android:id="@+id/playerGeese"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Geese player"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/llmain"
+        tools:layout_editor_absoluteX="163dp"
+        tools:layout_editor_absoluteY="73dp" />
+
+    <TextView
+        android:id="@+id/playerFox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fox player"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/llmain"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:layout_editor_absoluteX="174dp"
+        tools:layout_editor_absoluteY="643dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
