@@ -26,6 +26,9 @@ public class ConnectedClient implements Runnable{
     private String foxPlayer;
     private String geesePlayer;
     private String geeseState;
+    private int currentGeeseRow;
+    private int currentGeeseCol;
+
       
     public ConnectedClient(Socket socket,ArrayList<ConnectedClient> allClients)
     {
@@ -143,7 +146,9 @@ public class ConnectedClient implements Runnable{
                     }
                     
                     if(this.iAmFox)
+                    {
                         this.myTurn = true;
+                    }
                     else
                         this.myTurn = false;
                     
@@ -209,6 +214,8 @@ public class ConnectedClient implements Runnable{
                     System.out.println("Matrix presentation of the board:" + this.matrixGameBoard);
                 }
                 
+                ////////// COMMANDS THAT MODIFY THE GAME ACTIVITY ///////////////
+                
                 // IF block that handles the new move
                 if(line.startsWith("NewMove"))
                 {
@@ -220,6 +227,8 @@ public class ConnectedClient implements Runnable{
                         String [] positionToken = move.split(",");
                         String newRowIndex = positionToken[0];
                         String newColIndex = positionToken[1];
+                        
+                        // New coordinates
                         int newRow = Integer.parseInt(newRowIndex);
                         int newCol = Integer.parseInt(newColIndex);
                         int currRow = 0;
@@ -228,6 +237,7 @@ public class ConnectedClient implements Runnable{
                         // Fox move handling
                         if(this.iAmFox)
                         {
+                            // Find where the fox is right now
                             boolean foundFox = false;
                             for(int i = 1 ; i <= 8 ; i++)
                             {
@@ -244,27 +254,33 @@ public class ConnectedClient implements Runnable{
                                 if(foundFox)
                                 {
                                     break;
-                                }
-                                
+                                }   
                             }
                             
-                            // Check if this is valid fox move
+                            // Fox move is valid
                             if(Math.abs(newRow - currRow) == 1 && Math.abs(newCol - currCol) == 1 && this.matrixGameBoard[newRow][newCol] == 0)
                             {
-                                // Update the fields
-                                this.matrixGameBoard[currRow][currCol] = 0;
-                                this.matrixGameBoard[newRow][newCol] = 3;
-                                this.myTurn = !this.myTurn; // Does this do the job? How to switch opponents turn?
+                                for(ConnectedClient clnt : this.allClients)
+                                {
+                                    if(clnt.username.equals(this.foxPlayer) || clnt.username.equals(this.geesePlayer))
+                                    {
+                                        clnt.matrixGameBoard[currRow][currCol] = 0;
+                                        clnt.matrixGameBoard[newRow][newCol] = 3;
+                                        // IMPLEMENT FOX WINNING CONDITION HERE MAYBE, MAYBE CREATE A POP UP WINDOW - ELSE BRANCH UPDATES THE BOARD //     
+                                    }
+                                }
+                               
+                                // This should be an else branch for the upper one
                                 for(ConnectedClient clnt : this.allClients)
                                 {
                                     if(clnt.username.equals(this.foxPlayer) || clnt.username.equals(geesePlayer))
                                     {
                                         clnt.pw.println("UpdateBoardFox:"+newRow+":"+newCol);
-                                        // How to switch moves?
                                     }
                                 }
                                 
-                                // Is this possible?
+                                // Move handling logic
+                                this.myTurn = !this.myTurn;
                                 for(ConnectedClient clnt : this.allClients)
                                 {
                                     if(clnt.username.equals(this.geesePlayer))
@@ -276,31 +292,78 @@ public class ConnectedClient implements Runnable{
                             }
                             else
                             {
-                                this.pw.println("Invalid move");
+                                this.pw.println("InvalidFoxMove");
                             }
                         }
                         // Geese move handling - Make a state machine (GEESE SELECT -> GEESE MOVE)
                         else if(this.iAmGeese)
                         {
-                            int currGeeseRow;
-                            int currGeeseCol;
                             switch(this.geeseState)
                             {
                                 case "GEESE_SELECT":
-                                    currGeeseRow = newRow;
-                                    currGeeseCol = newCol;
-                                    this.geeseState = "GEESE_MOVE";
+                                    if(this.matrixGameBoard[newRow][newCol] == 2)
+                                    {
+                                        this.currentGeeseRow = newRow;
+                                        this.currentGeeseCol = newCol;
+                                        this.geeseState = "GEESE_MOVE";
+                                        this.pw.println("GeeseSelectedOk");
+                                    }
+                                    else
+                                    {
+                                        this.pw.println("DidntSelectGeese");
+                                        this.geeseState = "GEESE_SELECT";
+                                    }
+                                    
                                     break;
                                     
-                                case "GEESE_MOVE" : // Do the same checking like u did for fox only more limited (downwards)
+                                case "GEESE_MOVE" :
+                                    // Valid geese move
+                                    if((Math.abs(newCol - this.currentGeeseCol) == 1) && (Math.abs(newRow - this.currentGeeseRow) == 1) && (newRow > this.currentGeeseRow) && this.matrixGameBoard[newRow][newCol] == 0)
+                                    {
+                                        
+                                        // Message to update GUI
+                                        for(ConnectedClient clnt : this.allClients)
+                                        {
+                                            if(clnt.username.equals(this.foxPlayer) || clnt.username.equals(geesePlayer))
+                                            {
+                                                clnt.pw.println("UpdateBoardGeese:"+newRow+":"+newCol);
+                                            }
+                                        }
+                                        
+                                        // Update the server matrix board map
+                                        for(ConnectedClient clnt : this.allClients)
+                                        {
+                                            if(clnt.username.equals(this.foxPlayer) || clnt.username.equals(this.geesePlayer))
+                                            {
+                                                clnt.matrixGameBoard[this.currentGeeseRow][this.currentGeeseCol] = 0;
+                                                clnt.matrixGameBoard[newRow][newCol] = 2;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        this.pw.println("IlegelGeeseMove");
+                                    }
                                     
+                                    this.geeseState = "GEESE_SELECT";
                                     
-                                    break;
-                                    
-                                
+                                    // Move handling logic
+                                    this.myTurn = !this.myTurn;
+                                    for(ConnectedClient clnt : this.allClients)
+                                    {
+                                        if(clnt.username.equals(this.foxPlayer))
+                                        {
+                                            clnt.myTurn = true;
+                                            break;
+                                        }
+                                    }
+                                    break;                                   
                             }
-                            
-                        }
+                        }                                             
+                    }
+                    else
+                    {
+                        this.pw.println("NotYourTurn");
                     }
                 }
                 

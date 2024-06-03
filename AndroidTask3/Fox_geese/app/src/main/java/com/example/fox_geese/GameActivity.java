@@ -25,6 +25,12 @@ public class GameActivity extends AppCompatActivity {
     private Socket socket;
     private BufferedReader br;
     private PrintWriter pw;
+
+    public BufferedReader getBr()
+    {
+        return this.br;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +106,7 @@ public class GameActivity extends AppCompatActivity {
             llmain.addView(llrow);
         }
 
+        new Thread(new RecievedMessageFromServerGame(GameActivity.this)).start();
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
