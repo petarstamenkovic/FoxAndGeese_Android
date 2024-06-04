@@ -13,6 +13,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ public class GameActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        connectToServer();
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_game);
         gameBoard = new HashMap<String,ImageView>();
@@ -114,6 +116,29 @@ public class GameActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    public void connectToServer(){
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Singleton singleton = null;
+                try {
+                    singleton = Singleton.getInstance("");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                if (singleton != null){
+                    GameActivity.this.socket = singleton.socket;
+                    GameActivity.this.br = singleton.br;
+                    GameActivity.this.pw = singleton.pw;
+                }
+                else {
+                    System.out.println("Problem with socket, pw and br!");
+                }
+            }
+        }).start();
     }
 
     public void sendMessage(String message){

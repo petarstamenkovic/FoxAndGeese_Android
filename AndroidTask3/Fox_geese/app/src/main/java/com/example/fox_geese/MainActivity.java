@@ -197,28 +197,32 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void connectToServer(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (MainActivity.this.socket == null){
-                    try {
-                        if(!MainActivity.this.etIP.getText().toString().equals("")) {
-                            String ip_address = MainActivity.this.etIP.getText().toString();
-                            MainActivity.this.socket = new Socket(ip_address, 6001);
+        public void connectToServer(){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (MainActivity.this.socket == null){
+                        try {
+                            if(!MainActivity.this.etIP.getText().toString().equals("")) {
+                                String ip_address = MainActivity.this.etIP.getText().toString();
+                                Singleton singleton = Singleton.getInstance(ip_address);
+                                MainActivity.this.socket = singleton.socket;
+                                MainActivity.this.br = singleton.br;
+                                MainActivity.this.pw = singleton.pw;
+                                //MainActivity.this.socket = new Socket(ip_address, 6001);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        MainActivity.this.br = new BufferedReader(new InputStreamReader(MainActivity.this.socket.getInputStream()));
-                        MainActivity.this.pw = new PrintWriter(new OutputStreamWriter(MainActivity.this.socket.getOutputStream()), true);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                       //try {
+                            //MainActivity.this.br = new BufferedReader(new InputStreamReader(MainActivity.this.socket.getInputStream()));
+                            //MainActivity.this.pw = new PrintWriter(new OutputStreamWriter(MainActivity.this.socket.getOutputStream()), true);
+                        //} catch (IOException e) {
+                        //    e.printStackTrace();
+                        //}
                     }
                 }
-            }
-        }).start();
+            }).start();
     }
 
     public void sendMessage(String message){
