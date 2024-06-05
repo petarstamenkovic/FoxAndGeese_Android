@@ -205,7 +205,8 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             if(!MainActivity.this.etIP.getText().toString().equals("")) {
                                 String ip_address = MainActivity.this.etIP.getText().toString();
-                                Singleton singleton = Singleton.getInstance(ip_address);
+                                Singleton.setIP(ip_address);
+                                Singleton singleton = Singleton.getInstance();
                                 MainActivity.this.socket = singleton.socket;
                                 MainActivity.this.br = singleton.br;
                                 MainActivity.this.pw = singleton.pw;

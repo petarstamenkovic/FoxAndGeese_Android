@@ -65,7 +65,7 @@ public class RecievedMessageFromServerGame implements Runnable{
             }
 
             // IF block that notifies user that selected move is invalid
-            if(line.startsWith("InavlidFoxMove"))
+            if(line.startsWith("InvalidFoxMove"))
             {
                 parent.runOnUiThread(new Runnable() {
                     @Override
@@ -197,7 +197,7 @@ public class RecievedMessageFromServerGame implements Runnable{
                 });
             }
 
-            // IF block that handles the fox win situtation
+            // IF block that handles the fox win situation
             if(line.startsWith("FoxWin"))
             {
                 String[]updateTokens = line.split(":");

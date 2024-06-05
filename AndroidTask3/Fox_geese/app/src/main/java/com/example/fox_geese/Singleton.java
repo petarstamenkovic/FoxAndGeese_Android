@@ -9,20 +9,25 @@ import java.net.Socket;
 
 public class Singleton {
     private static Singleton single_instance = null;
-    public Socket socket;
-    public BufferedReader br;
-    public PrintWriter pw;
-    public String ip_address;
-    private Singleton(String ip_address) throws IOException {
-        // What to do here with IP address?
-        this.socket = new Socket(ip_address, 6001);
-        this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-        this.pw = new PrintWriter(new OutputStreamWriter(this.socket.getOutputStream()), true);
+    public static Socket socket;
+    public static BufferedReader br;
+    public static PrintWriter pw;
+    public static String ip_address;
+    public static void setIP(String ip_addres){
+        ip_address = ip_addres;
+    }
+    private Singleton() throws IOException {
+        System.out.println("adresa:" + ip_address);
+        socket = new Socket(ip_address, 6001);
+        br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
     }
 
-    public static synchronized Singleton getInstance(String ip_address) throws IOException {
-        if(single_instance == null)
-            single_instance = new Singleton(ip_address);
+    public static synchronized Singleton getInstance() throws IOException {
+        if(single_instance == null) {
+            System.out.println("Creating singleton");
+            single_instance = new Singleton();
+        }
         return single_instance;
     }
 

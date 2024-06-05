@@ -132,13 +132,23 @@ public class ConnectedClient implements Runnable{
                     String [] acceptTokens = line.split(":");
                     String player1 = acceptTokens[1];
                     String player2 = acceptTokens[2];
-                    this.foxPlayer = player1;
-                    this.geesePlayer = player2;
+                    System.out.println("Fox is : " + player1 + " and geese is: "+ player2);
+                    
+                    // Update roles for both players
+                    for(ConnectedClient clnt : this.allClients)
+                    {
+                        if(clnt.username.equals(player1) || clnt.username.equals(player2))
+                        {
+                            clnt.foxPlayer = player1;
+                            clnt.geesePlayer = player2;
+                        }
+                    }
                     
                     // Divide roles
                     if(this.username.equals(player1))
                     {
                         this.iAmFox = true;
+                        this.myTurn = true;
                         this.iAmGeese = false;
                     }
                     else if(this.username.equals(player2))
@@ -147,11 +157,7 @@ public class ConnectedClient implements Runnable{
                         this.iAmGeese = true;
                     }
                     
-                    if(this.iAmFox)                   
-                        this.myTurn = true;                  
-                    else
-                        this.myTurn = false;
-                    
+                    // Both players are now unavaillable
                     for(ConnectedClient clnt : this.allClients)
                     {
                         if(clnt.username.equals(player1) || clnt.username.equals(player2))
@@ -162,16 +168,18 @@ public class ConnectedClient implements Runnable{
                     }
                 }
                 
+                // THIS IS NOT RECIEVED //
+                
                 // IF block that creates a matrix footprint of a map
-                if(line.startsWith("FoxPostion"))
+                if(line.startsWith("FoxPosition"))
                 {
                     String [] matrixToken = line.split(":");
                     String foxIndexPosition = matrixToken[1].trim();
                     int foxPosition = Integer.parseInt(foxIndexPosition);
                     // DARK FIELDS - 0 ; LIGHT FIELDS - 1 ; GEESE FIELDS - 2 ; FOX FIELD - 3 //
-                    for(int row = 1 ; row <= 8 ; row++)
+                    for(int row = 0 ; row <= 7 ; row++)
                     {
-                        for(int col = 1; col <= 8 ; col++)
+                        for(int col = 0; col <= 7 ; col++)
                         {
                             // Odd rows
                             if(row % 2 != 0)
@@ -199,13 +207,13 @@ public class ConnectedClient implements Runnable{
                             }
                             
                             // Set geese position
-                            if(row == 1 && col % 2 != 0)
+                            if(row == 0 && col % 2 == 0)
                             {
                                 this.matrixGameBoard[row][col] = 2;
                             }
                             
                             // Set fox position
-                            if(row == 8 && col == foxPosition)
+                            if(row == 7 && col == foxPosition)
                             {
                                 this.matrixGameBoard[row][col] = 3;
                                 for(ConnectedClient clnt : this.allClients)
@@ -219,7 +227,15 @@ public class ConnectedClient implements Runnable{
                             }
                         }
                     }
-                    System.out.println("Initial matrix presentation of the board:" + this.matrixGameBoard);
+                    
+                    // Print the matrix in a readable format
+                    System.out.println("Initial matrix presentation of the board:");
+                    for (int i = 0; i < matrixGameBoard.length; i++) {
+                        for (int j = 0; j < matrixGameBoard[i].length; j++) {
+                            System.out.print(matrixGameBoard[i][j] + " ");
+                        }
+                        System.out.println(); // Move to the next line after printing each row
+}
                 }
                 
                 ////////// COMMANDS THAT MODIFY THE GAME ACTIVITY ///////////////
@@ -227,8 +243,10 @@ public class ConnectedClient implements Runnable{
                 // IF block that handles the new move
                 if(line.startsWith("NewMove"))
                 {
+                    System.out.println("New move was recieved!");
                     if(this.myTurn)
                     {
+                        System.out.println("In my turn if block!");
                         String gameState = "";
                         // Recieve and parse the move information
                         String [] moveToken = line.split(":");
@@ -247,12 +265,12 @@ public class ConnectedClient implements Runnable{
                         
                         // Fox move handling
                         if(this.iAmFox)
-                        {             
-
-                            
+                        {           
+                            System.out.println("In iAmFox if block!");
                             // Fox move is valid - Update both players fox position
                             if(Math.abs(newRow - this.currentFoxRow) == 1 && Math.abs(newCol - this.curretnFoxCol) == 1 && this.matrixGameBoard[newRow][newCol] == 0)
                             {
+                                System.out.println("In validFox move if block!");
                                 for(ConnectedClient clnt : this.allClients)
                                 {
                                     if(clnt.username.equals(this.foxPlayer) || clnt.username.equals(this.geesePlayer))
@@ -267,7 +285,7 @@ public class ConnectedClient implements Runnable{
                                 }
                                
                                 // Possible scenarios after a valid fox move
-                                if(this.currentFoxRow == 1)
+                                if(this.currentFoxRow == 0)
                                 {
                                     gameState = "FoxWin";
                                 }
@@ -279,7 +297,7 @@ public class ConnectedClient implements Runnable{
                                 {
                                     gameState = "FoxUpdate";
                                 }
-                                
+                                System.out.println("Game state is :" + gameState);
                                 // Send both players message about new game status
                                 for(ConnectedClient clnt : this.allClients)
                                 {
@@ -288,12 +306,15 @@ public class ConnectedClient implements Runnable{
                                         switch(gameState)
                                         {
                                             case "FoxWin" : 
+                                                System.out.println("Fox wins!");
                                                 clnt.pw.println("FoxWin:"+oldRow + ":" + oldCol + ":" +newRow+":"+newCol);
                                                 break;
                                             case "GeeseWin" :     
+                                                System.out.println("Geese wins!");
                                                 clnt.pw.println("GeeseWin:"+oldRow + ":" + oldCol + ":" +newRow+":"+newCol);
                                                 break;
                                             case "FoxUpdate": 
+                                                System.out.println("Fox move valid, sending a request to update GUI!");
                                                 clnt.pw.println("UpdateBoardFox:"+oldRow + ":" + oldCol + ":" +newRow+":"+newCol);
                                                 break;
                                         }
@@ -319,6 +340,7 @@ public class ConnectedClient implements Runnable{
                         // Geese move handling - Make a state machine (GEESE SELECT -> GEESE MOVE)
                         else if(this.iAmGeese)
                         {
+                            System.out.println("In iAmGeese if block!");
                             switch(this.geeseState)
                             {
                                 case "GEESE_SELECT":
@@ -348,7 +370,6 @@ public class ConnectedClient implements Runnable{
                                             {
                                                 clnt.matrixGameBoard[this.currentGeeseRow][this.currentGeeseCol] = 0;
                                                 clnt.matrixGameBoard[newRow][newCol] = 2;
-                                                
                                             }
                                         }
                                         
@@ -369,10 +390,12 @@ public class ConnectedClient implements Runnable{
                                             {
                                                 switch(gameState)
                                                 {
-                                                    case "GeeseWin" :     
+                                                    case "GeeseWin" : 
+                                                        System.out.println("Geese win!");
                                                         clnt.pw.println("GeeseWin:"+this.currentGeeseRow+":" + this.currentGeeseCol +":"+newRow+":"+newCol);
                                                         break;
                                                     case "UpdateBoardGeese": 
+                                                        System.out.println("Geese move valid, sending a request to update GUI!");
                                                         clnt.pw.println("UpdateBoardGeese:"+this.currentGeeseRow+":" + this.currentGeeseCol +":"+newRow+":"+newCol);
                                                         break;
                                                 }
@@ -381,7 +404,7 @@ public class ConnectedClient implements Runnable{
                                     }
                                     else
                                     {
-                                        this.pw.println("IlegelGeeseMove");
+                                        this.pw.println("IllegalGeeseMove");
                                     }
                                     
                                     this.geeseState = "GEESE_SELECT";
@@ -402,6 +425,7 @@ public class ConnectedClient implements Runnable{
                     }
                     else
                     {
+                        System.out.println("Not my turn!");
                         this.pw.println("NotYourTurn");
                     }
                 }

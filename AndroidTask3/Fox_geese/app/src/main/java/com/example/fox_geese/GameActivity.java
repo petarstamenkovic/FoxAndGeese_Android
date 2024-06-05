@@ -2,8 +2,10 @@ package com.example.fox_geese;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -23,6 +25,11 @@ public class GameActivity extends AppCompatActivity {
     int numRows = 8;
     int numColumns = 8;
     HashMap<String, ImageView> gameBoard;
+    TextView tvTurn;
+    public TextView getTvTurn()
+    {
+        return this.tvTurn;
+    }
     private Socket socket;
     private BufferedReader br;
     private PrintWriter pw;
@@ -40,20 +47,23 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
         gameBoard = new HashMap<String,ImageView>();
         LinearLayout llmain = findViewById(R.id.llmain);
+        tvTurn = (TextView) findViewById(R.id.tvTurn);
 
         // Randomly select one of the dark squares on the last row (2, 4, 6, 8)
-        Random random = new Random();
-        int[] darkColumns = {2, 4, 6, 8};
-        int randomDarkColumn = darkColumns[random.nextInt(darkColumns.length)];
+        //Random random = new Random();
+        //int[] darkColumns = {2, 4, 6, 8};
+        //int randomDarkColumn = darkColumns[random.nextInt(darkColumns.length)];
+
+        new Thread(new RecievedMessageFromServerGame(GameActivity.this)).start();
 
         // Create an empty board first
-        for(int row = 1; row <= numRows; row++)
+        for(int row = 0; row < numRows; row++)
         {
             LinearLayout llrow = new LinearLayout(this);
             llrow.setOrientation(LinearLayout.HORIZONTAL);
             LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1);
             llrow.setLayoutParams(rowLayoutParams);
-            for(int col = 1; col <= numColumns ; col++)
+            for(int col = 0; col < numColumns ; col++)
             {
                 ImageView iv = new ImageView(this);
                 iv.setTag(row + "," + col);
@@ -61,10 +71,11 @@ public class GameActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1); // Modify this for full map view
                 layoutParams.weight = 1;
                 iv.setLayoutParams(layoutParams);
+
                 // On odd rows, dark fields are on odd columns and light on even
-                if(row % 2 != 0)
+                if(row % 2 == 0)
                 {
-                    if(col % 2 != 0)
+                    if(col % 2 == 0)
                     {
                         iv.setImageResource(R.drawable.darksquare);
                     }
@@ -76,7 +87,7 @@ public class GameActivity extends AppCompatActivity {
                 // On even rows, dark fields are on odd columns
                 else
                 {
-                    if(col % 2 == 0)
+                    if(col % 2 != 0)
                     {
                         iv.setImageResource(R.drawable.darksquare);
                     }
@@ -87,15 +98,15 @@ public class GameActivity extends AppCompatActivity {
                 }
 
                 // Set the geese on top row dark squares
-                if (row == 1 && col % 2 != 0) {
+                if (row == 0 && col % 2 == 0) {
                     iv.setImageResource(R.drawable.darksquaregeese);
                 }
 
                 // Set the fox image on the randomly selected dark square in the last row
-                if (row == numRows && col == randomDarkColumn) {
+                if (row == numRows-1 && col == 1) {
                     iv.setImageResource(R.drawable.darksquarefox);
                 }
-                sendMessage("FoxPosition:"+randomDarkColumn);
+
                 iv.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -106,10 +117,10 @@ public class GameActivity extends AppCompatActivity {
                 llrow.addView(iv);
             }
             llmain.addView(llrow);
+
         }
 
-        new Thread(new RecievedMessageFromServerGame(GameActivity.this)).start();
-
+        sendMessage("FoxPosition:1");
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -118,6 +129,7 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
+
     public void connectToServer(){
 
         new Thread(new Runnable() {
@@ -125,7 +137,8 @@ public class GameActivity extends AppCompatActivity {
             public void run() {
                 Singleton singleton = null;
                 try {
-                    singleton = Singleton.getInstance("");
+                    singleton = Singleton.getInstance();
+                    //System.out.println("IP ADDRES : " + singleton.ip_address);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
