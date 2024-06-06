@@ -143,10 +143,12 @@ public class RecievedMessageFromServerGame implements Runnable{
             // IF block that notifies that it is not current users move
             if(line.startsWith("NotYourTurn"))
             {
+                String info = "Not your turn!";
                 parent.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         Toast.makeText(parent, "Not your turn!",Toast.LENGTH_SHORT).show();
+                        parent.getTvTurn().setText(info);
                     }
                 });
             }
