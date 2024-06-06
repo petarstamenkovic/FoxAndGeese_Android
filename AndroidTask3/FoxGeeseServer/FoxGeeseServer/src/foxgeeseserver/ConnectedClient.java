@@ -74,7 +74,7 @@ public class ConnectedClient implements Runnable{
         // Check when fox is on the left edge of the board
         if(this.curretnFoxCol == 0)
         {
-            if((this.matrixGameBoard[this.currentFoxRow-1][this.currentGeeseCol+1] != 0) && (this.matrixGameBoard[this.currentFoxRow+1][this.curretnFoxCol+1] != 0))
+            if((this.matrixGameBoard[this.currentFoxRow-1][this.curretnFoxCol+1] != 0) && (this.matrixGameBoard[this.currentFoxRow+1][this.curretnFoxCol+1] != 0))
             {
                 return true;
             }
@@ -82,9 +82,9 @@ public class ConnectedClient implements Runnable{
                 return false;
         }
         // Chech when the fox is on the right edge of the board
-        else if(this.currentGeeseCol == 7)
+        else if(this.curretnFoxCol == 7)
         {
-            if((this.matrixGameBoard[this.currentFoxRow-1][this.currentGeeseCol-1] != 0) && (this.matrixGameBoard[this.currentFoxRow+1][this.currentGeeseCol-1] != 0))
+            if((this.matrixGameBoard[this.currentFoxRow-1][this.curretnFoxCol-1] != 0) && (this.matrixGameBoard[this.currentFoxRow+1][this.curretnFoxCol-1] != 0))
             {
                 return true;
             }
@@ -366,7 +366,7 @@ public class ConnectedClient implements Runnable{
                                 }
                                 
                                 // Move handling logic - Fox player turn false, geese player turn true
-                                this.myTurn = !this.myTurn;
+                                this.myTurn = false;
                                 for(ConnectedClient clnt : this.allClients)
                                 {
                                     if(clnt.username.equals(this.geesePlayer))
@@ -402,8 +402,7 @@ public class ConnectedClient implements Runnable{
                                         this.pw.println("DidntSelectGeese");
                                         this.geeseState = "GEESE_SELECT";
                                     }
-                                    
-                                    break;
+                                break;
                                     
                                 case "GEESE_MOVE" :
                                     // Valid geese move
@@ -432,12 +431,12 @@ public class ConnectedClient implements Runnable{
                                         // Send both players message about new game status
                                         for(ConnectedClient clnt : this.allClients)
                                         {
-                                            if(clnt.username.equals(this.foxPlayer) || clnt.username.equals(geesePlayer))
+                                            if(clnt.username.equals(this.foxPlayer) || clnt.username.equals(this.geesePlayer))
                                             {
                                                 switch(gameState)
                                                 {
                                                     case "GeeseWin" : 
-                                                        System.out.println("Geese win!");
+                                                        System.out.println("Geese win on geese move!");
                                                         clnt.pw.println("GeeseWin:"+this.currentGeeseRow+":" + this.currentGeeseCol +":"+newRow+":"+newCol);
                                                         break;
                                                     case "UpdateBoardGeese": 
@@ -448,26 +447,26 @@ public class ConnectedClient implements Runnable{
                                                 }
                                             }
                                         }
+                                        this.geeseState = "GEESE_SELECT";
+                                        
+                                        // Move handling logic
+                                        this.myTurn = false;
+                                        for(ConnectedClient clnt : this.allClients)
+                                        {
+                                            if(clnt.username.equals(this.foxPlayer))
+                                            {
+                                                clnt.myTurn = true;
+                                                break;
+                                            }
+                                        }
                                     }
                                     else
                                     {
+                                        this.geeseState = "GEESE_MOVE";
                                         System.out.println("Invalid geese move!");
                                         this.pw.println("IllegalGeeseMove");
                                     }
-                                    
-                                    this.geeseState = "GEESE_SELECT";
-                                    
-                                    // Move handling logic
-                                    this.myTurn = !this.myTurn;
-                                    for(ConnectedClient clnt : this.allClients)
-                                    {
-                                        if(clnt.username.equals(this.foxPlayer))
-                                        {
-                                            clnt.myTurn = true;
-                                            break;
-                                        }
-                                    }
-                                    break;                                   
+                                break;                                   
                             }
                         }                                             
                     }

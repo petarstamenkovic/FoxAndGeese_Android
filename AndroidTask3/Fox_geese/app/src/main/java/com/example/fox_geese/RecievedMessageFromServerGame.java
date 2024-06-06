@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 
 public class RecievedMessageFromServerGame implements Runnable{
@@ -14,6 +15,7 @@ public class RecievedMessageFromServerGame implements Runnable{
     GameActivity parent;
     BufferedReader br;
     HashMap<String, ImageView> gameBoard;
+    private volatile boolean running = true;
     public RecievedMessageFromServerGame(GameActivity parent)
     {
         this.parent = parent;
@@ -21,22 +23,36 @@ public class RecievedMessageFromServerGame implements Runnable{
         this.gameBoard = parent.gameBoard;
     }
 
+    public void stop(){
+        running = false;
+    }
+
     @Override
     public void run()
     {
-        while(true)
+        while(running)
         {
             String line;
 
             try {
-                line = this.br.readLine();
+                synchronized (br) {
+                    line = this.br.readLine();
+                }
+                if (line == null) {
+                    break;
+                }
+            } catch (SocketTimeoutException e) {
+                // Handle timeout
+                continue; // Skip this iteration and continue the loop
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
+                break;
             }
 
             // IF block that modifies board according to a successful fox move
             if(line.startsWith("UpdateBoardFox"))
             {
+                System.out.println("I recieved a message from server.");
                 String[]updateTokens = line.split(":");
                 String oldRow = updateTokens[1];
                 String oldCol = updateTokens[2];
@@ -78,6 +94,7 @@ public class RecievedMessageFromServerGame implements Runnable{
             // IF block that notifies that user successfully select geese
             if(line.startsWith("GeeseSelectedOk"))
             {
+                System.out.println("I recieved a selected geese request");
                 String [] geeseToken = line.split(":");
                 String geeseRow = geeseToken[1];
                 String geeseCol = geeseToken[2];
@@ -104,6 +121,7 @@ public class RecievedMessageFromServerGame implements Runnable{
             // IF block that modifies board according to a successful geese move
             if(line.startsWith("UpdateBoardGeese"))
             {
+                System.out.println("I reveived a geese move request");
                 String[]updateTokens = line.split(":");
                 String oldRow = updateTokens[1];
                 String oldCol = updateTokens[2];
