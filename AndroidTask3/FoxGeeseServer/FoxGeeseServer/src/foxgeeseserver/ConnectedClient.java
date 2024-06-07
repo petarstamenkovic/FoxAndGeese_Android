@@ -282,9 +282,28 @@ public class ConnectedClient implements Runnable{
                         }
                     }
                     printBoardMatrix();
+       
                 }
                 
                 ////////// COMMANDS THAT MODIFY THE GAME ACTIVITY ///////////////
+                
+                /*
+                if(line.startsWith("GetPlayerInfo"))
+                {                     
+                    // Loop that sends out fox and geese usernames to GameActivity
+                    for(ConnectedClient clnt : this.allClients)
+                    {
+                        if(clnt.username.equals(this.foxPlayer))
+                        {
+                            clnt.pw.println("FoxRoleUpdate:"+this.foxPlayer);
+                        }
+                        else if(clnt.username.equals(this.geesePlayer))
+                        {
+                            clnt.pw.println("GeeseRoleUpadate:"+this.geesePlayer);
+                        }
+                    }
+                }
+                */
                 
                 // IF block that handles the new move
                 if(line.startsWith("NewMove"))
@@ -321,7 +340,7 @@ public class ConnectedClient implements Runnable{
                                         clnt.matrixGameBoard[this.currentFoxRow][this.curretnFoxCol] = 0;
                                         clnt.matrixGameBoard[newRow][newCol] = 3;
                                         oldRow = this.currentFoxRow;
-                                        oldCol = this.currentGeeseCol;
+                                        oldCol = this.curretnFoxCol;
                                         clnt.currentFoxRow = newRow;
                                         clnt.curretnFoxCol = newCol;
                                     }
@@ -331,7 +350,7 @@ public class ConnectedClient implements Runnable{
                                 if(this.currentFoxRow == 0)
                                 {
                                     gameState = "FoxWin";
-                                }// Fix the borders here
+                                }
                                 else if(didGeeseWin())
                                 {
                                     gameState = "GeeseWin";
@@ -341,6 +360,7 @@ public class ConnectedClient implements Runnable{
                                     gameState = "FoxUpdate";
                                 }
                                 System.out.println("Game state is :" + gameState);
+                                
                                 // Send both players message about new game status
                                 for(ConnectedClient clnt : this.allClients)
                                 {

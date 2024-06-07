@@ -13,7 +13,7 @@ import java.io.IOException;
 public class RecievedMessageFromServer implements Runnable {
     MainActivity parent;
     BufferedReader br;
-
+    private boolean running = true;
     public RecievedMessageFromServer(MainActivity parent) {
         this.parent = parent;
         this.br = parent.getBr();
@@ -22,7 +22,7 @@ public class RecievedMessageFromServer implements Runnable {
     @Override
     public void run() {
 
-        while (true) {
+        while (running) {
             String line;
             try {
                 line = this.br.readLine();
@@ -101,6 +101,7 @@ public class RecievedMessageFromServer implements Runnable {
                 // Both clients accepted a game, new activity should be presented to both??
                 if(line.startsWith("Game on"))
                 {
+                    this.running = false;
                     Intent intent = new Intent(parent,GameActivity.class);
                     parent.startActivity(intent);
                 }

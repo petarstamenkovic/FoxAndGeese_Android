@@ -48,7 +48,6 @@ public class GameActivity extends AppCompatActivity {
         gameBoard = new HashMap<String,ImageView>();
         LinearLayout llmain = findViewById(R.id.llmain);
         tvTurn = (TextView) findViewById(R.id.tvTurn);
-
         // Randomly select one of the dark squares on the last row (2, 4, 6, 8)
         //Random random = new Random();
         //int[] darkColumns = {2, 4, 6, 8};
@@ -110,7 +109,7 @@ public class GameActivity extends AppCompatActivity {
                 iv.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(GameActivity.this, "You pressed on board field" +v.getTag().toString(),Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(GameActivity.this, "You pressed on board field" +v.getTag().toString(),Toast.LENGTH_SHORT).show();
                         sendMessage("NewMove:" + v.getTag().toString());
                     }
                 });
@@ -138,7 +137,6 @@ public class GameActivity extends AppCompatActivity {
                 Singleton singleton = null;
                 try {
                     singleton = Singleton.getInstance();
-                    //System.out.println("IP ADDRES : " + singleton.ip_address);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
