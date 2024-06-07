@@ -13,11 +13,22 @@ import java.io.IOException;
 public class RecievedMessageFromServer implements Runnable {
     MainActivity parent;
     BufferedReader br;
-    private boolean running = true;
+    private boolean running;
+
+    public void setRunning(boolean running) {
+        this.running = running;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
     public RecievedMessageFromServer(MainActivity parent) {
         this.parent = parent;
         this.br = parent.getBr();
+        this.running = true;
     }
+
 
     @Override
     public void run() {
@@ -103,7 +114,15 @@ public class RecievedMessageFromServer implements Runnable {
                 {
                     this.running = false;
                     Intent intent = new Intent(parent,GameActivity.class);
-                    parent.startActivity(intent);
+                    parent.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            parent.btnAccept.setEnabled(false);
+                            parent.btnDecline.setEnabled(false);
+                            parent.activity2Launcher.launch(intent);
+                        }
+                    });
+                    //parent.startActivity(intent);
                 }
                 /// NEW BLOCK STARTS HERE ///
                 ///if(line.startsWith(""))///

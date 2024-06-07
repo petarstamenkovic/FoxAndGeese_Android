@@ -128,6 +128,77 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
+    public void reinitGame()
+    {
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_game);
+        gameBoard = new HashMap<String,ImageView>();
+        LinearLayout llmain = findViewById(R.id.llmain);
+        tvTurn = (TextView) findViewById(R.id.tvTurn);
+        // Create an empty board first
+        for(int row = 0; row < numRows; row++)
+        {
+            LinearLayout llrow = new LinearLayout(this);
+            llrow.setOrientation(LinearLayout.HORIZONTAL);
+            LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1);
+            llrow.setLayoutParams(rowLayoutParams);
+            for(int col = 0; col < numColumns ; col++)
+            {
+                ImageView iv = new ImageView(this);
+                iv.setTag(row + "," + col);
+                gameBoard.put(row + "," + col,iv);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1); // Modify this for full map view
+                layoutParams.weight = 1;
+                iv.setLayoutParams(layoutParams);
+
+                // On odd rows, dark fields are on odd columns and light on even
+                if(row % 2 == 0)
+                {
+                    if(col % 2 == 0)
+                    {
+                        iv.setImageResource(R.drawable.darksquare);
+                    }
+                    else
+                    {
+                        iv.setImageResource(R.drawable.lightsquare);
+                    }
+                }
+                // On even rows, dark fields are on odd columns
+                else
+                {
+                    if(col % 2 != 0)
+                    {
+                        iv.setImageResource(R.drawable.darksquare);
+                    }
+                    else
+                    {
+                        iv.setImageResource(R.drawable.lightsquare);
+                    }
+                }
+
+                // Set the geese on top row dark squares
+                if (row == 0 && col % 2 == 0) {
+                    iv.setImageResource(R.drawable.darksquaregeese);
+                }
+
+                // Set the fox image on the randomly selected dark square in the last row
+                if (row == numRows-1 && col == 1) {
+                    iv.setImageResource(R.drawable.darksquarefox);
+                }
+
+                iv.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //Toast.makeText(GameActivity.this, "You pressed on board field" +v.getTag().toString(),Toast.LENGTH_SHORT).show();
+                        sendMessage("NewMove:" + v.getTag().toString());
+                    }
+                });
+                llrow.addView(iv);
+            }
+            llmain.addView(llrow);
+        }
+        sendMessage("FoxPosition:1");
+    }
 
     public void connectToServer(){
 

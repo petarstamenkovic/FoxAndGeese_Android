@@ -1,7 +1,10 @@
 package com.example.fox_geese;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -38,12 +41,14 @@ public class RecievedMessageFromServerGame implements Runnable {
 
             if (line.startsWith("UpdateBoardFox"))
             {
+
                     String[] updateTokens = line.split(":");
                     String oldRow = updateTokens[1];
                     String oldCol = updateTokens[2];
                     String newRow = updateTokens[3];
                     String newCol = updateTokens[4];
                     String turnInfo = "Geese turn!";
+                    System.out.println("Old position: "+oldRow+":"+oldCol+" New position: "+newRow+":"+newCol);
 
                     parent.runOnUiThread(new Runnable() {
                         @Override
@@ -168,7 +173,7 @@ public class RecievedMessageFromServerGame implements Runnable {
                                     .setTitle("Geese Win")
                                     .setMessage("The geese have won! Do you want to play again?")
                                     .setPositiveButton("Yes", (dialog, which) -> parent.sendMessage("RestartGame"))
-                                    .setNegativeButton("No", (dialog, which) -> parent.finish()) // Close the activity
+                                    .setNegativeButton("No", (dialog, which) -> parent.sendMessage("DontWannaPlay"))
                                     .setIcon(android.R.drawable.ic_dialog_alert)
                                     .show();
                         }
@@ -197,13 +202,38 @@ public class RecievedMessageFromServerGame implements Runnable {
                                     .setTitle("Fox Win")
                                     .setMessage("The fox has won! Do you want to play again?")
                                     .setPositiveButton("Yes", (dialog, which) -> parent.sendMessage("RestartGame"))
-                                    .setNegativeButton("No", (dialog, which) -> parent.finish())
+                                    .setNegativeButton("No", (dialog, which) -> parent.sendMessage("DontWannaPlay"))
                                     .setIcon(android.R.drawable.ic_dialog_alert)
                                     .show();
                         }
                     });
+                }
 
+                // Terminate both client's GameActivities
+                if(line.startsWith("TerminateMatch"))
+                {
+                    parent.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                             Intent resultIntent = new Intent();
+                             parent.setResult(RESULT_OK,resultIntent);
+                             parent.finish();
+                        }
+                    });
+                    break;
+                }
 
+                if(line.startsWith("GameToRestart"))
+                {
+                    parent.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            parent.reinitGame();
+                            //Intent intent = new Intent(parent,GameActivity.class);
+                            //parent.startActivity(intent);
+                            //parent.finish();
+                        }
+                    });
                 }
 
         }

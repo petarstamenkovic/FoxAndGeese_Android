@@ -10,6 +10,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -25,6 +29,7 @@ import java.security.spec.ECField;
 
 public class MainActivity extends AppCompatActivity {
 
+    private RecievedMessageFromServer rmfs;
     Button btnConnect;
     Button btnEnterRoom;
     Button btnAccept;
@@ -126,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.etUsername.setEnabled(true);
                 MainActivity.this.btnConnect.setEnabled(false);
                 MainActivity.this.etIP.setEnabled(false);
-                //new Thread(new RecievedMessageFromServer(MainActivity.this)).start();
             }
         });
 
@@ -139,8 +143,13 @@ public class MainActivity extends AppCompatActivity {
                     String usernameMessage = "Name:";
                     String messageToSend = usernameMessage + MainActivity.this.etUsername.getText().toString();
                     sendMessage(messageToSend);
+                    
+                    RecievedMessageFromServer rmfs = new RecievedMessageFromServer(MainActivity.this);
+                    MainActivity.this.rmfs = rmfs;
+                    Thread thread = new Thread(rmfs);
+                    thread.start();
 
-                    new Thread(new RecievedMessageFromServer(MainActivity.this)).start();
+                    //new Thread(new RecievedMessageFromServer(MainActivity.this)).start();
                 }
             }
         });
@@ -152,8 +161,6 @@ public class MainActivity extends AppCompatActivity {
                 String userToChallenge = MainActivity.this.spAllPlayers.getSelectedItem().toString();
                 String challenger = MainActivity.this.etUsername.getText().toString().trim();
                 sendMessage("Challenge:"+userToChallenge+":"+challenger);
-
-                //new Thread(new RecievedMessageFromServer(MainActivity.this)).start();
             }
         });
 
@@ -167,8 +174,6 @@ public class MainActivity extends AppCompatActivity {
                 sendMessage("Declined challenge:"+ whoGotDeclined);
                 btnAccept.setEnabled(false);
                 btnDecline.setEnabled(false);
-
-                //new Thread(new RecievedMessageFromServer(MainActivity.this)).start();
             }
         });
 
@@ -181,13 +186,8 @@ public class MainActivity extends AppCompatActivity {
                 String challenger = contestantTokens[1];
                 String challengedUser = etUsername.getText().toString();
                 sendMessage("Accepted challenge - Game on:" + challenger + ":" + challengedUser);
-
-                //Intent intent = new Intent(MainActivity.this,GameActivity.class);
-                //startActivity(intent);
-                //new Thread(new RecievedMessageFromServer(MainActivity.this)).start();
             }
         });
-
 
         // What is the point of this and is it necessary?
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -236,4 +236,20 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
     }
+
+    ActivityResultLauncher<Intent> activity2Launcher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == RESULT_OK){
+                        if(rmfs != null)
+                        {
+                            rmfs.setRunning(true);
+                            new Thread(rmfs).start();
+                        }
+                    }
+                }
+            }
+    );
 }

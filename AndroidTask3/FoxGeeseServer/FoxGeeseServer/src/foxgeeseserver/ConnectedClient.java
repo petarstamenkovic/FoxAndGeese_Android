@@ -30,6 +30,7 @@ public class ConnectedClient implements Runnable{
     private int currentGeeseCol;
     private int currentFoxRow;
     private int curretnFoxCol;
+    private boolean agreeToPlayAgain;
 
       
     public ConnectedClient(Socket socket,ArrayList<ConnectedClient> allClients)
@@ -48,6 +49,7 @@ public class ConnectedClient implements Runnable{
             this.foxPlayer = "";
             this.geesePlayer = "";
             this.geeseState = "GEESE_SELECT";
+            this.agreeToPlayAgain = false;
         } catch (IOException ex) {
             Logger.getLogger(ConnectedClient.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -282,28 +284,13 @@ public class ConnectedClient implements Runnable{
                         }
                     }
                     printBoardMatrix();
+                    System.out.println("iAmFox : " + this.iAmFox + " iAmGeese : " + this.iAmGeese);
+                    System.out.println("Initial fox position : "+this.currentFoxRow+":"+this.curretnFoxCol);
        
                 }
                 
                 ////////// COMMANDS THAT MODIFY THE GAME ACTIVITY ///////////////
-                
-                /*
-                if(line.startsWith("GetPlayerInfo"))
-                {                     
-                    // Loop that sends out fox and geese usernames to GameActivity
-                    for(ConnectedClient clnt : this.allClients)
-                    {
-                        if(clnt.username.equals(this.foxPlayer))
-                        {
-                            clnt.pw.println("FoxRoleUpdate:"+this.foxPlayer);
-                        }
-                        else if(clnt.username.equals(this.geesePlayer))
-                        {
-                            clnt.pw.println("GeeseRoleUpadate:"+this.geesePlayer);
-                        }
-                    }
-                }
-                */
+               
                 
                 // IF block that handles the new move
                 if(line.startsWith("NewMove"))
@@ -339,8 +326,8 @@ public class ConnectedClient implements Runnable{
                                     {
                                         clnt.matrixGameBoard[this.currentFoxRow][this.curretnFoxCol] = 0;
                                         clnt.matrixGameBoard[newRow][newCol] = 3;
-                                        oldRow = this.currentFoxRow;
-                                        oldCol = this.curretnFoxCol;
+                                        oldRow = clnt.currentFoxRow;
+                                        oldCol = clnt.curretnFoxCol;
                                         clnt.currentFoxRow = newRow;
                                         clnt.curretnFoxCol = newCol;
                                     }
@@ -364,7 +351,7 @@ public class ConnectedClient implements Runnable{
                                 // Send both players message about new game status
                                 for(ConnectedClient clnt : this.allClients)
                                 {
-                                    if(clnt.username.equals(this.foxPlayer) || clnt.username.equals(geesePlayer))
+                                    if(clnt.username.equals(this.foxPlayer) || clnt.username.equals(this.geesePlayer))
                                     {
                                         switch(gameState)
                                         {
@@ -380,6 +367,7 @@ public class ConnectedClient implements Runnable{
                                                 System.out.println("Fox move valid, sending a request to update GUI!");
                                                 printBoardMatrix();
                                                 clnt.pw.println("UpdateBoardFox:"+oldRow + ":" + oldCol + ":" +newRow+":"+newCol);
+                                                System.out.println("Update sent to GUI: "+oldRow + ":" + oldCol + ":" +newRow+":"+newCol);
                                                 break;
                                         }
                                     }
@@ -389,7 +377,7 @@ public class ConnectedClient implements Runnable{
                                 this.myTurn = false;
                                 for(ConnectedClient clnt : this.allClients)
                                 {
-                                    if(clnt.username.equals(this.geesePlayer))
+                                    if(clnt.iAmGeese)
                                     {
                                         clnt.myTurn = true;
                                         break;
@@ -473,7 +461,7 @@ public class ConnectedClient implements Runnable{
                                         this.myTurn = false;
                                         for(ConnectedClient clnt : this.allClients)
                                         {
-                                            if(clnt.username.equals(this.foxPlayer))
+                                            if(clnt.iAmFox)
                                             {
                                                 clnt.myTurn = true;
                                                 break;
@@ -497,6 +485,65 @@ public class ConnectedClient implements Runnable{
                     }
                 }
                 
+                // IF block that handles situation when restart is declined
+                if(line.startsWith("DontWannaPlay"))
+                {
+                    for(ConnectedClient clnt : this.allClients)
+                    {
+                        if(clnt.username.equals(this.foxPlayer) || clnt.username.equals(this.geesePlayer))
+                        {
+                            clnt.availlable = true;
+                            clnt.pw.println("TerminateMatch");
+                        }
+                    }
+                }
+                
+                if(line.startsWith("RestartGame"))
+                {
+                    int i = 0;
+                    this.agreeToPlayAgain = true;
+                    for(ConnectedClient clnt : this.allClients)
+                    {
+                        if(clnt.username.equals(this.foxPlayer) || clnt.username.equals(this.geesePlayer))
+                        {
+                            if(clnt.agreeToPlayAgain)
+                            {
+                                i++;
+                            }
+                        }
+                    }
+                    
+                    if(i == 2)
+                    {
+                        for(ConnectedClient clnt : this.allClients)
+                        {
+                            if(clnt.iAmFox)
+                            {
+                                clnt.availlable = false;
+                                clnt.iAmFox = false;
+                                clnt.iAmGeese = true;
+                                clnt.myTurn = false;
+                                clnt.agreeToPlayAgain = false;
+                            }
+                            else if(clnt.iAmGeese)
+                            {
+                                clnt.availlable = false;
+                                clnt.iAmFox = true;
+                                clnt.iAmGeese = false;
+                                clnt.myTurn = true;
+                                clnt.agreeToPlayAgain = false;
+                            }
+                        }
+                        
+                        for(ConnectedClient clnt : this.allClients)
+                        {
+                            if(clnt.username.equals(this.foxPlayer) || clnt.username.equals(this.geesePlayer))
+                            {
+                                clnt.pw.println("GameToRestart");
+                            }
+                        } 
+                    }
+                }
                 /// NEW TYPE OF MESSAGE HERE ///
         }
 
