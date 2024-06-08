@@ -1,13 +1,14 @@
 # FoxAndGeese_Android
 First task from Android App Development from course on a Master year. 
 I implemented a "fox and geese" client-server game, where I used Android Studio(client implementation) and NetBeans(server implementation). Programming language is Java.
+
 App has 2 activities : 
   1. MainActivity - Handles the logging in process (name, ip address and challenge issueing)
   2. GameActivity - Board draws out and users begin with the game.
 
-As mentioned the game client(user) can be one of two players : 
+As mentioned the game client(user) can have one of two roles : 
   1. Fox - Fox is a red circle whose goal is to reach the top row of the board. Fox can move 1 field in any diagonal.
-  2. Geese - Geese have to trap the fox in terms that it does not have any more valid moves. Geese can move one field diagonal but only downwards.
+  2. Geese - Geese player(who has 4 geese tokens - green button) has to trap the fox, in terms, that it does not have any more valid moves. Geese can move one field diagonal but only downwards.
 
 In my implementation all players move across the dark fields, but this can easily be modified. Also map is loaded through Resource folder and ImageViews so 
 you can simply add any image fox the color of the fields, fox image or geese image. 
