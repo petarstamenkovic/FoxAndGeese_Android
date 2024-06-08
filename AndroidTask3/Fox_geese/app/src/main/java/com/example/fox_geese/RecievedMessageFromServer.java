@@ -30,6 +30,7 @@ public class RecievedMessageFromServer implements Runnable {
     }
 
 
+    // Receive a message, parse the data and in runOnUiThread method modify necessary GUI changes
     @Override
     public void run() {
 
@@ -38,27 +39,12 @@ public class RecievedMessageFromServer implements Runnable {
             try {
                 line = this.br.readLine();
 
-                /*
-                if(line.startsWith("ConnectOk"))
-                {
-                    parent.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            parent.getBtnConnect().setEnabled(false);
-                            parent.getEtIP().setEnabled(false);
-                            parent.getBtnEnterRoom().setEnabled(true);
-                            parent.getEtUsername().setEnabled(true);
-                        }
-                    });
-                }
-                 */
-
-                // Receive a message, parse the data and in runOnUiThread method modify necessary GUI changes
+                // Update spinner with new players and modify GUI
                 if (line.startsWith("NewList")) {
                     String[] userTokens = line.split(":");
                     String allUsernames = userTokens[1];
                     String[] usernames = allUsernames.split(",");
-                    System.out.println("I recieved new list from server:" + line);
+
                     // Fill the spinner and modify the component availability
                     parent.runOnUiThread(new Runnable() {
                         @Override
@@ -100,16 +86,13 @@ public class RecievedMessageFromServer implements Runnable {
                     parent.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            //Toast.makeText(MainActivity.this, "Challenge declined!", Toast.LENGTH_LONG).show();  why is this not working?
                             parent.getTvChallenge().setText("Challenge declined, try again later!");
-                            //parent.getBtnDecline().setEnabled(false);
-                            //parent.getBtnAccept().setEnabled(false);
                         }
                     });
 
                 }
 
-                // Both clients accepted a game, new activity should be presented to both??
+                // Both clients accepted a game - launch a new activity
                 if(line.startsWith("Game on"))
                 {
                     this.running = false;
@@ -122,11 +105,8 @@ public class RecievedMessageFromServer implements Runnable {
                             parent.activity2Launcher.launch(intent);
                         }
                     });
-                    //parent.startActivity(intent);
+
                 }
-                /// NEW BLOCK STARTS HERE ///
-                ///if(line.startsWith(""))///
-                ///                       ///
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

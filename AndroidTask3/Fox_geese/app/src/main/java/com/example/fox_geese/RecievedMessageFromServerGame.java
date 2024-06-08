@@ -21,7 +21,6 @@ public class RecievedMessageFromServerGame implements Runnable {
     GameActivity parent;
     BufferedReader br;
     HashMap<String, ImageView> gameBoard;
-    //private volatile boolean running = true;
 
     public RecievedMessageFromServerGame(GameActivity parent) {
         this.parent = parent;
@@ -39,6 +38,7 @@ public class RecievedMessageFromServerGame implements Runnable {
                 throw new RuntimeException(e);
             }
 
+            // IF block that updates the fox move on a GUI
             if (line.startsWith("UpdateBoardFox"))
             {
 
@@ -68,6 +68,7 @@ public class RecievedMessageFromServerGame implements Runnable {
                     });
                 }
 
+                // IF block that notifies a user made an invalid fox move
                 if (line.startsWith("InvalidFoxMove"))
                 {
                     parent.runOnUiThread(new Runnable() {
@@ -78,6 +79,7 @@ public class RecievedMessageFromServerGame implements Runnable {
                     });
                 }
 
+                // IF block that notifies a user successfully chose a geese
                 if (line.startsWith("GeeseSelectedOk"))
                 {
                     System.out.println("I received a selected geese request");
@@ -93,6 +95,7 @@ public class RecievedMessageFromServerGame implements Runnable {
                     });
                 }
 
+                // If block that notifies a user that he didnt select a geese
                 if (line.startsWith("DidntSelectedGeese"))
                 {
                     parent.runOnUiThread(new Runnable() {
@@ -103,6 +106,7 @@ public class RecievedMessageFromServerGame implements Runnable {
                     });
                 }
 
+                // IF blcok that updates a GUI with a geese move
                 if (line.startsWith("UpdateBoardGeese"))
                 {
                     String[] updateTokens = line.split(":");
@@ -129,6 +133,7 @@ public class RecievedMessageFromServerGame implements Runnable {
                     });
                 }
 
+                // IF block that notifies a user made an illegal geese move
                 if (line.startsWith("IllegalGeeseMove"))
                 {
                     parent.runOnUiThread(new Runnable() {
@@ -139,6 +144,7 @@ public class RecievedMessageFromServerGame implements Runnable {
                     });
                 }
 
+                // IF block that notifies its not the current users turn
                 if (line.startsWith("NotYourTurn"))
                 {
                     String info = "Not your turn!";
@@ -151,6 +157,7 @@ public class RecievedMessageFromServerGame implements Runnable {
                     });
                 }
 
+                // IF block that handles a geese win, update GUI and show a popup dialog
                 if (line.startsWith("GeeseWin")) {
                     String[] updateTokens = line.split(":");
                     String oldRow = updateTokens[1];
@@ -180,7 +187,8 @@ public class RecievedMessageFromServerGame implements Runnable {
                     });
                 }
 
-                if (line.startsWith("FoxWin")) {
+            // IF block that handles a fox win, update GUI and show a popup dialog
+            if (line.startsWith("FoxWin")) {
                     String[] updateTokens = line.split(":");
                     String oldRow = updateTokens[1];
                     String oldCol = updateTokens[2];
@@ -209,7 +217,7 @@ public class RecievedMessageFromServerGame implements Runnable {
                     });
                 }
 
-                // Terminate both client's GameActivities
+                // IF block that terminates both client's GameActivities
                 if(line.startsWith("TerminateMatch"))
                 {
                     parent.runOnUiThread(new Runnable() {
@@ -223,15 +231,13 @@ public class RecievedMessageFromServerGame implements Runnable {
                     break;
                 }
 
+                // IF block that resets the board in case of a game restart
                 if(line.startsWith("GameToRestart"))
                 {
                     parent.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             parent.reinitGame();
-                            //Intent intent = new Intent(parent,GameActivity.class);
-                            //parent.startActivity(intent);
-                            //parent.finish();
                         }
                     });
                 }

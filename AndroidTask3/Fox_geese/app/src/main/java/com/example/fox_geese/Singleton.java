@@ -17,7 +17,6 @@ public class Singleton {
         ip_address = ip_addres;
     }
     private Singleton() throws IOException {
-        System.out.println("adresa:" + ip_address);
         socket = new Socket(ip_address, 6001);
         br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);

@@ -30,6 +30,8 @@ import java.security.spec.ECField;
 public class MainActivity extends AppCompatActivity {
 
     private RecievedMessageFromServer rmfs;
+
+    // Component declaration and methods
     Button btnConnect;
     Button btnEnterRoom;
     Button btnAccept;
@@ -148,8 +150,6 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.rmfs = rmfs;
                     Thread thread = new Thread(rmfs);
                     thread.start();
-
-                    //new Thread(new RecievedMessageFromServer(MainActivity.this)).start();
                 }
             }
         });
@@ -189,7 +189,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // What is the point of this and is it necessary?
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -197,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+        // Method that connects client to a server
         public void connectToServer(){
             new Thread(new Runnable() {
                 @Override
@@ -210,22 +210,16 @@ public class MainActivity extends AppCompatActivity {
                                 MainActivity.this.socket = singleton.socket;
                                 MainActivity.this.br = singleton.br;
                                 MainActivity.this.pw = singleton.pw;
-                                //MainActivity.this.socket = new Socket(ip_address, 6001);
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                       //try {
-                            //MainActivity.this.br = new BufferedReader(new InputStreamReader(MainActivity.this.socket.getInputStream()));
-                            //MainActivity.this.pw = new PrintWriter(new OutputStreamWriter(MainActivity.this.socket.getOutputStream()), true);
-                        //} catch (IOException e) {
-                        //    e.printStackTrace();
-                        //}
                     }
                 }
             }).start();
     }
 
+    // Message that creates a temporary thread to send a message to server
     public void sendMessage(String message){
         new Thread(new Runnable() {
             @Override
@@ -237,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
+    // Custom activity launcher, on callback set the flag to true to re-activate MainActivity
     ActivityResultLauncher<Intent> activity2Launcher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {

@@ -33,7 +33,10 @@ public class GameActivity extends AppCompatActivity {
     private Socket socket;
     private BufferedReader br;
     private PrintWriter pw;
-
+    private static final int [] foxPossibilities = {1,3,5,7};
+    private static long fixedSeed = 1234;
+    private int foxPosition;
+    private Random random;
     public BufferedReader getBr()
     {
         return this.br;
@@ -48,12 +51,14 @@ public class GameActivity extends AppCompatActivity {
         gameBoard = new HashMap<String,ImageView>();
         LinearLayout llmain = findViewById(R.id.llmain);
         tvTurn = (TextView) findViewById(R.id.tvTurn);
-        // Randomly select one of the dark squares on the last row (2, 4, 6, 8)
-        //Random random = new Random();
-        //int[] darkColumns = {2, 4, 6, 8};
-        //int randomDarkColumn = darkColumns[random.nextInt(darkColumns.length)];
+        Random random = new Random(fixedSeed);
+        this.random = random;
 
+        // Open a new thread for a listener class
         new Thread(new RecievedMessageFromServerGame(GameActivity.this)).start();
+
+        // Randomise fox players position
+        foxPosition = getRandonFoxPosition();
 
         // Create an empty board first
         for(int row = 0; row < numRows; row++)
@@ -102,14 +107,14 @@ public class GameActivity extends AppCompatActivity {
                 }
 
                 // Set the fox image on the randomly selected dark square in the last row
-                if (row == numRows-1 && col == 1) {
+                if (row == numRows-1 && col == foxPosition) {
                     iv.setImageResource(R.drawable.darksquarefox);
                 }
 
+                // Once you click on a field, send field coordinates to server
                 iv.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //Toast.makeText(GameActivity.this, "You pressed on board field" +v.getTag().toString(),Toast.LENGTH_SHORT).show();
                         sendMessage("NewMove:" + v.getTag().toString());
                     }
                 });
@@ -119,7 +124,8 @@ public class GameActivity extends AppCompatActivity {
 
         }
 
-        sendMessage("FoxPosition:1");
+        // Initial message to server, just needs a fox position to create a matrix map
+        sendMessage("FoxPosition:"+foxPosition);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -128,6 +134,14 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
+    // Function that gets random index for a new fox position
+    private int getRandonFoxPosition()
+    {
+        int randomIndex = this.random.nextInt(foxPossibilities.length);
+        return foxPossibilities[randomIndex];
+    }
+
+    // Method that reinitializes a board - this is bad implementation but i had issues with the idea of simply launching new activity
     public void reinitGame()
     {
         EdgeToEdge.enable(this);
@@ -135,6 +149,9 @@ public class GameActivity extends AppCompatActivity {
         gameBoard = new HashMap<String,ImageView>();
         LinearLayout llmain = findViewById(R.id.llmain);
         tvTurn = (TextView) findViewById(R.id.tvTurn);
+
+        foxPosition = getRandonFoxPosition();
+
         // Create an empty board first
         for(int row = 0; row < numRows; row++)
         {
@@ -182,7 +199,7 @@ public class GameActivity extends AppCompatActivity {
                 }
 
                 // Set the fox image on the randomly selected dark square in the last row
-                if (row == numRows-1 && col == 1) {
+                if (row == numRows-1 && col == foxPosition) {
                     iv.setImageResource(R.drawable.darksquarefox);
                 }
 
@@ -197,7 +214,7 @@ public class GameActivity extends AppCompatActivity {
             }
             llmain.addView(llrow);
         }
-        sendMessage("FoxPosition:1");
+        sendMessage("FoxPosition:"+foxPosition);
     }
 
     public void connectToServer(){

@@ -95,6 +95,7 @@ public class ConnectedClient implements Runnable{
         }
         else
         {
+            // Check when the fox is elsewhere on the board
             if((this.matrixGameBoard[this.currentFoxRow-1][this.curretnFoxCol-1] != 0) && (this.matrixGameBoard[this.currentFoxRow+1][this.curretnFoxCol-1] != 0) && (this.matrixGameBoard[this.currentFoxRow-1][this.curretnFoxCol+1] != 0) && (this.matrixGameBoard[this.currentFoxRow+1][this.curretnFoxCol+1] != 0))
             {
                 return true;
@@ -137,7 +138,7 @@ public class ConnectedClient implements Runnable{
                     System.out.println("Sending new list:" + allUsers);
                 }
                 
-                // Got a challnge, forward it to the requested user
+                // Got a challnge, forward it to the requested user and if user is availlable send a request
                 if(line.startsWith("Challenge:"))
                 {
                     String [] challengeToken = line.split(":");
@@ -222,9 +223,7 @@ public class ConnectedClient implements Runnable{
                             clnt.pw.println("Game on!");
                         }
                     }
-                }
-                
-                // THIS IS NOT RECIEVED //
+                }             
                 
                 // IF block that creates a matrix footprint of a map
                 if(line.startsWith("FoxPosition"))
@@ -284,20 +283,22 @@ public class ConnectedClient implements Runnable{
                         }
                     }
                     printBoardMatrix();
-                    System.out.println("iAmFox : " + this.iAmFox + " iAmGeese : " + this.iAmGeese);
-                    System.out.println("Initial fox position : "+this.currentFoxRow+":"+this.curretnFoxCol);
+                    
+                    //System.out.println("iAmFox : " + this.iAmFox + " iAmGeese : " + this.iAmGeese);
+                    //System.out.println("Initial fox position : "+this.currentFoxRow+":"+this.curretnFoxCol);
        
                 }
                 
-                ////////// COMMANDS THAT MODIFY THE GAME ACTIVITY ///////////////
+                ////////// CODE THAT MODIFIES THE GAME ACTIVITY ///////////////
                
                 
-                // IF block that handles the new move
+                // IF block that handles the new move, checks the validity and sends an adequate message to server
                 if(line.startsWith("NewMove"))
                 {
                     if(this.myTurn)
                     {
                         String gameState = "";
+                        
                         // Recieve and parse the move information
                         String [] moveToken = line.split(":");
                         String move = moveToken[1];
@@ -344,9 +345,11 @@ public class ConnectedClient implements Runnable{
                                 }
                                 else
                                 {
+                                    // No one wins, just update the GUI
                                     gameState = "FoxUpdate";
                                 }
-                                System.out.println("Game state is :" + gameState);
+                                
+                                //System.out.println("Game state is :" + gameState);
                                 
                                 // Send both players message about new game status
                                 for(ConnectedClient clnt : this.allClients)
@@ -395,6 +398,7 @@ public class ConnectedClient implements Runnable{
                         {
                             switch(this.geeseState)
                             {
+                                // First you have to select which geese to move
                                 case "GEESE_SELECT":
                                     if(this.matrixGameBoard[newRow][newCol] == 2)
                                     {
@@ -402,7 +406,7 @@ public class ConnectedClient implements Runnable{
                                         this.currentGeeseCol = newCol;
                                         this.geeseState = "GEESE_MOVE";
                                         this.pw.println("GeeseSelectedOk:" + this.currentGeeseRow + ":" + this.currentGeeseCol);
-                                        System.out.println("You selected geese succesfully! Now pick a valid field.");
+                                        System.out.println("You selected geese "+this.currentGeeseRow+","+this.currentGeeseCol+ " succesfully! Now pick a valid field.");
                                     }
                                     else
                                     {
@@ -411,9 +415,11 @@ public class ConnectedClient implements Runnable{
                                         this.geeseState = "GEESE_SELECT";
                                     }
                                 break;
-                                    
+                                
+                                // If you chose a geese, check if it has a valid move    
                                 case "GEESE_MOVE" :
                                     // Valid geese move
+                                    System.out.println("Old Row: "+this.currentGeeseRow + " Old Col: "+this.currentGeeseCol + " New Row: "+newRow + " New Col: "+newCol);
                                     if((Math.abs(newCol - this.currentGeeseCol) == 1) && (Math.abs(newRow - this.currentGeeseRow) == 1) && (newRow > this.currentGeeseRow) && this.matrixGameBoard[newRow][newCol] == 0)
                                     {           
                                         // Update the server board
@@ -498,6 +504,7 @@ public class ConnectedClient implements Runnable{
                     }
                 }
                 
+                // IF block that checks if game should be restarted
                 if(line.startsWith("RestartGame"))
                 {
                     int i = 0;

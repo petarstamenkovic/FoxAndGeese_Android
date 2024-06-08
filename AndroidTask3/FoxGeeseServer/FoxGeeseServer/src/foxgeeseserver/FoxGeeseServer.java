@@ -40,14 +40,9 @@ public class FoxGeeseServer {
                 Logger.getLogger(FoxGeeseServer.class.getName()).log(Level.SEVERE, null, ex);
             }
             if (client != null) {
-                //Povezao se novi klijent, kreiraj objekat klase ConnectedChatRoomClient
-                //koji ce biti zaduzen za komunikaciju sa njim
                 ConnectedClient clnt = new ConnectedClient(client, clients);
-                //i dodaj ga na listu povezanih klijenata jer ce ti trebati kasnije
                 clients.add(clnt);
-                //kreiraj novu nit (konstruktoru prosledi klasu koja implementira Runnable interfejs)
                 thr = new Thread(clnt);
-                //..i startuj ga
                 thr.start();
             } else {
                 break;
