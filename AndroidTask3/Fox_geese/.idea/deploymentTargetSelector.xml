@@ -15,12 +15,17 @@
           <targets>
             <Target type="DEFAULT_BOOT">
               <handle>
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Pera\.android\avd\Pixel_6_API_27.avd" />
+              </handle>
+            </Target>
+            <Target type="DEFAULT_BOOT">
+              <handle>
                 <DeviceId pluginId="PhysicalDevice" identifier="serial=LGD62085581210" />
               </handle>
             </Target>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Pera\.android\avd\Pixel_6_API_27.avd" />
+                <DeviceId pluginId="PhysicalDevice" identifier="serial=R9PR4014G4J" />
               </handle>
             </Target>
           </targets>

@@ -149,16 +149,28 @@ public class ConnectedClient implements Runnable{
                     {
                         for(ConnectedClient clnt : this.allClients)
                         {
-                            if(clnt.username.equals(userToChallenge) && clnt.availlable)
+                            if(clnt.username.equals(userToChallenge))
                             {
-                                clnt.pw.println("Recieved challenge - User :" + challenger + ":challenges:" + clnt.username);
-                                break;
+                                // Check if user with that username is abaillable
+                                if(clnt.availlable)
+                                {
+                                    clnt.pw.println("Recieved challenge - User :" + challenger + ":challenges:" + clnt.username);
+                                    break;                                    
+                                }
+                                else
+                                {
+                                    this.pw.println("UserNotAvailable");
+                                    System.out.println("User is not available!");
+                                    break;
+                                }
+
                             }
                         }
                     }
                     else
                     {
                         System.out.println("User challenged himself! This is not possible.");
+                        this.pw.println("CantChallengeUrself");
                     }
                 }
                 

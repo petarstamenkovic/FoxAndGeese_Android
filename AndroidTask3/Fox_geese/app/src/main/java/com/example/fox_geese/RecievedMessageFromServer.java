@@ -80,6 +80,27 @@ public class RecievedMessageFromServer implements Runnable {
                     });
                 }
 
+                if(line.startsWith("CantChallengeUrself"))
+                {
+                    parent.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(parent, "Cant challenge yourself!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
+                // IF block that notifies that user is not currently available
+                if(line.startsWith("UserNotAvailable"))
+                {
+                    parent.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(parent, "Challenged user is not available right now!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
                 // IF block that notifies declined user
                 if(line.startsWith("Declined user"))
                 {
